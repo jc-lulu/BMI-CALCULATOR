@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'BMI Calculator',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -78,8 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       });
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('BMI Calculated')));
+      _saveData();
     }
   }
 
@@ -89,8 +88,22 @@ class _MyHomePageState extends State<MyHomePage> {
     await prefs.setString('weightStatus', weightStatus);
     await prefs.setString('bmiMessage', bmiMessage);
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Saved Successfully')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('BMI calculated successfully.')));
+  }
+
+  Future<void> _clear() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    setState(() {
+      bmi = prefs.getDouble('bmi') ?? 0.00;
+      weightStatus = prefs.getString('weightStatus') ?? "Underweight";
+      bmiMessage = prefs.getString('bmiMessage') ??
+          "You have a lower than a normal body weight. You can eat a bit more.";
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data cleared successfully')));
+    });
   }
 
   Future<void> _loadSavedData() async {
@@ -148,19 +161,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Container(
-                height: 300,
+                height: 250,
                 width: 400,
                 margin: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(),
+                // decoration: const BoxDecoration(color: Colors.amber),
                 child: Column(
                   children: [
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Please enter your height in centimeters";
+                        } else if (!RegExp(r'^\d+(\.\d)?$').hasMatch(value)) {
+                          return "Please enter a valid number";
                         } else {
-                          return null;
+                          double height = double.parse(value);
+                          if (height < 50 || height > 300) {
+                            return "Please enter a height between 50cm and 300cm";
+                          }
                         }
+                        return null;
                       },
                       controller: _heightController,
                       decoration: const InputDecoration(
@@ -174,10 +193,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Please enter your weight";
+                          return "Please enter your weight in kilograms";
+                        } else if (!RegExp(r'^\d+(\.\d)?$').hasMatch(value)) {
+                          return "Please enter a valid number";
                         } else {
-                          return null;
+                          double weight = double.parse(value);
+                          if (weight < 30 || weight > 300) {
+                            return "Please enter a height between 30kg and 300kg";
+                          }
                         }
+                        return null;
                       },
                       controller: _weightController,
                       decoration: const InputDecoration(
@@ -188,32 +213,37 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(
                       height: 20,
                     ),
-                    ElevatedButton(
-                      onPressed: _calculateBMI,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        backgroundColor: Colors.green[400],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 35, vertical: 20),
-                      ),
-                      child: const Text('Calculate BMI'),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    ElevatedButton(
-                      onPressed: _saveData,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        backgroundColor: Colors.green[400],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 60, vertical: 20),
-                      ),
-                      child: const Text('Save'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _calculateBMI,
+                          icon: const Icon(Icons.calculate),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            backgroundColor: Colors.green[400],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 25, vertical: 15),
+                          ),
+                          label: const Text('Calculate BMI'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: _clear,
+                          icon: const Icon(Icons.delete),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            backgroundColor:
+                                const Color.fromARGB(255, 187, 41, 33),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 35, vertical: 15),
+                          ),
+                          label: const Text('Clear data'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
