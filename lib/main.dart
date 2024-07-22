@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'BMI Calculator',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -34,8 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _weightController = TextEditingController();
   double bmi = 0.00;
   String weightStatus = "Underweight";
-  String bmiMessage =
-      "You have a lower than a normal body weight. You can eat a bit more.";
+  String bmiMessage = " ---- ";
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bmi = double.parse((weight / (heightM * heightM)).toStringAsFixed(2));
         // Calculate BMI
 
-        if (bmi < 18.5) {
+        if (bmi < 18.5 && bmi != 0) {
           weightStatus = "Underweight";
           bmiMessage =
               "You have a lower than a normal body weight. You can eat a bit more.";
@@ -98,8 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       bmi = prefs.getDouble('bmi') ?? 0.00;
       weightStatus = prefs.getString('weightStatus') ?? "Underweight";
-      bmiMessage = prefs.getString('bmiMessage') ??
-          "You have a lower than a normal body weight. You can eat a bit more.";
+      bmiMessage = prefs.getString('bmiMessage') ?? " ---- ";
 
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data cleared successfully')));
@@ -111,8 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       bmi = prefs.getDouble('bmi') ?? 0.00;
       weightStatus = prefs.getString('weightStatus') ?? "Underweight";
-      bmiMessage = prefs.getString('bmiMessage') ??
-          "You have a lower than a normal body weight. You can eat a bit more.";
+      bmiMessage = prefs.getString('bmiMessage') ?? " ---- ";
     });
   }
 
@@ -120,41 +118,63 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // leading: Image.asset('../images/bmi.jpg'),
         title: const Text("BMI CALCULATOR"),
         foregroundColor: Colors.white,
-        backgroundColor: Colors.green[500],
+        backgroundColor: Color.fromARGB(255, 65, 147, 70),
       ),
       body: Center(
         child: Form(
           key: _formKey,
           child: Column(
             children: [
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                "Calculate your BMI",
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              ),
               Container(
                 height: 250,
                 width: 400,
                 margin: const EdgeInsets.all(10),
                 decoration: const BoxDecoration(
-                    // color: Colors.green,
-                    ),
+                  border: Border(
+                      bottom: BorderSide(
+                          color: Color.fromARGB(255, 16, 41, 19), width: 3),
+                      top: BorderSide(
+                          color: Color.fromARGB(255, 16, 41, 19), width: 3),
+                      left: BorderSide(
+                          color: Color.fromARGB(255, 16, 41, 19), width: 3),
+                      right: BorderSide(
+                          color: Color.fromARGB(255, 16, 41, 19), width: 3)),
+                  color: Color.fromARGB(255, 65, 147, 70),
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Calculate your BMI",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    // const Text(
+                    //   "Result",
+                    //   style: TextStyle(
+                    //       fontSize: 25,
+                    //       fontWeight: FontWeight.bold,
+                    //       color: Colors.white),
+                    // ),
+                    Text(
+                      'Weight Status: $weightStatus',
+                      style: const TextStyle(fontSize: 20, color: Colors.white),
                     ),
                     Text(
-                      'BMI: $bmi',
-                      style: const TextStyle(fontSize: 25),
-                    ),
-                    Text(
-                      weightStatus,
-                      style: const TextStyle(fontSize: 25),
+                      '$bmi',
+                      style: const TextStyle(fontSize: 50, color: Colors.white),
                     ),
                     Text(
                       bmiMessage,
-                      style: const TextStyle(fontSize: 20),
+                      style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontFamily: 'italic'),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -182,9 +202,26 @@ class _MyHomePageState extends State<MyHomePage> {
                         return null;
                       },
                       controller: _heightController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Height: Centimeters',
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 85, 85, 85),
+                              width: 2.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide:
+                              BorderSide(color: Colors.green, width: 2.0),
+                        ),
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 214, 214, 214)
+                            .withOpacity(0.2),
+                        labelText: 'Height: Centimeter',
+                        labelStyle: TextStyle(color: Colors.grey[700]),
                       ),
                     ),
                     const SizedBox(
@@ -205,9 +242,26 @@ class _MyHomePageState extends State<MyHomePage> {
                         return null;
                       },
                       controller: _weightController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Weight: Kilograms',
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(255, 85, 85, 85),
+                              width: 2.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                          borderSide:
+                              BorderSide(color: Colors.green, width: 2.0),
+                        ),
+                        filled: true,
+                        fillColor:
+                            Color.fromARGB(255, 214, 214, 214).withOpacity(0.2),
+                        labelText: 'Weight: Kilogram',
+                        labelStyle: TextStyle(color: Colors.grey[700]),
                       ),
                     ),
                     const SizedBox(
@@ -222,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)),
-                            backgroundColor: Colors.green[400],
+                            backgroundColor: Color.fromARGB(255, 65, 147, 70),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 25, vertical: 15),
